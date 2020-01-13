@@ -16,14 +16,20 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from core.models import Item, OrderItem, Order
 from .serializers import (
     ItemSerializer, OrderSerializer, ItemDetailSerializer, AddressSerializer,
-    PaymentSerializer
+    PaymentSerializer, VideoSerializer
 )
-from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation
+from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation, Video
 
 
 import stripe
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+class VideoListView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = VideoSerializer
+    queryset = Video.objects.all()
 
 
 class UserIDView(APIView):

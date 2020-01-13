@@ -6,6 +6,11 @@ from django.shortcuts import reverse
 from django_countries.fields import CountryField
 
 
+# from django.contrib.auth import get_user_model
+from django_extensions.db.fields import AutoSlugField
+# from django.urls import reverse
+from django.template.defaultfilters import slugify
+
 CATEGORY_CHOICES = (
     ('S', 'Shirt'),
     ('SW', 'Sport wear'),
@@ -212,3 +217,154 @@ def userprofile_receiver(sender, instance, created, *args, **kwargs):
 
 
 post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=35)
+    slug = models.CharField(max_length=250)
+    created_at = models.DateTimeField(auto_now_add=False)
+
+    def __str__(self):
+        return self.name
+
+
+class Video(models.Model):
+    title = models.CharField(max_length=500)
+    slug = AutoSlugField(populate_from="title")
+    description = models.CharField(max_length=500)
+    videofile = models.FileField(upload_to='videos/', null=True)
+    thumbnail = models.ImageField()
+    uploader = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True, blank=False)
+    modified_at = models.DateTimeField(auto_now=True)
+    private = models.BooleanField(default=True)
+    tags = models.ManyToManyField(Tag, blank=True, null=True)
+
+    def __str__(self):
+        return self.title + ": " + str(self.videofile)
+
+    def get_absolute_url(self):
+        return reverse('videos:detail', kwargs={
+            'slug': self.slug
+        })
+
+
+class Rating(models.Model):
+    score = models.IntegerField(null=True)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class LikedVideos(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class SavedVideos(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    watched_at = models.DateTimeField(auto_now_add=True)
+
+
+class WatchedVideos(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Chat(models.Model):
+    admin = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='chats')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True,
+                             on_delete=models.SET_NULL, related_name='sender')
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, null=True,
+                                  on_delete=models.SET_NULL, related_name='receiver')
+    subject = models.CharField(max_length=35)
+    text = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+MEMBERSHIP_CHOICES = (
+    ('Enterprise', 'ent'),
+    ('Professional', 'pro'),
+    ('Free', 'free')
+)
+
+
+class Membership(models.Model):
+    slug = models.SlugField()
+    membership_type = models.CharField(
+        choices=MEMBERSHIP_CHOICES,
+        default='Free',
+        max_length=30)
+    price = models.IntegerField(default=15)
+    stripe_plan_id = models.CharField(max_length=40)
+
+    def __str__(self):
+        return self.membership_type
+
+
+class UserMembership(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    stripe_customer_id = models.CharField(max_length=40)
+    membership = models.ForeignKey(
+        Membership, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.user.username
+
+
+def post_save_usermembership_create(sender, instance, created, *args, **kwargs):
+    user_membership, created = UserMembership.objects.get_or_create(
+        user=instance)
+
+    if user_membership.stripe_customer_id is None or user_membership.stripe_customer_id == '':
+        new_customer_id = stripe.Customer.create(email=instance.email)
+        try:
+            free_membership = Membership.objects.get(membership_type='Free')
+        except Membership.DoesNotExist:
+            free_membership = None
+        user_membership.stripe_customer_id = new_customer_id['id']
+        user_membership.membership = free_membership
+        user_membership.save()
+
+
+post_save.connect(post_save_usermembership_create,
+                  sender=settings.AUTH_USER_MODEL)
+
+
+class Subscription(models.Model):
+    user_membership = models.ForeignKey(
+        UserMembership, on_delete=models.CASCADE)
+    stripe_subscription_id = models.CharField(max_length=40)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.user_membership.user.username
+
+    @property
+    def get_created_date(self):
+        subscription = stripe.Subscription.retrieve(
+            self.stripe_subscription_id)
+        return datetime.fromtimestamp(subscription.created)
+
+    @property
+    def get_next_billing_date(self):
+        subscription = stripe.Subscription.retrieve(
+            self.stripe_subscription_id)
+        return datetime.fromtimestamp(subscription.current_period_end)

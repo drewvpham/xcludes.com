@@ -2,7 +2,7 @@
 
 from .base import *
 
-ALLOWED_HOSTS += ['127.0.0.1']
+ALLOWED_HOSTS += ['127.0.0.1', 'localhost']
 DEBUG = True
 
 WSGI_APPLICATION = 'home.wsgi.dev.application'
@@ -20,5 +20,5 @@ CORS_ORIGIN_WHITELIST = (
 
 # Stripe
 
-STRIPE_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
-STRIPE_SECRET_KEY = config('STRIPE_TEST_SECRET_KEY')
+STRIPE_PUBLIC_KEY = 'pk_test_kpmCSJfEkHbexz8iWeycgi3r00zJ9nJEvS'
+STRIPE_SECRET_KEY = 'sk_test_r9LR2UyS67S6ETwpI29hxGuL004bTSTel5'

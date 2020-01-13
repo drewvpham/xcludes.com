@@ -27,10 +27,13 @@ class CustomLayout extends React.Component {
         <Menu inverted>
           <Container>
             <Link to="/">
-              <Menu.Item header>Home</Menu.Item>
+              <Menu.Item header>Videos</Menu.Item>
             </Link>
             <Link to="/products">
-              <Menu.Item header>Products</Menu.Item>
+              <Menu.Item header>Shop</Menu.Item>
+            </Link>
+            <Link to="/products">
+              <Menu.Item header>Play</Menu.Item>
             </Link>
             {authenticated ? (
               <React.Fragment>
@@ -47,7 +50,8 @@ class CustomLayout extends React.Component {
                   >
                     <Dropdown.Menu>
                       {cart !== null ? (
-                        <React.Fragment>
+                        <React.Fragment header>
+
                           {cart.order_items.map(order_item => {
                             return (
                               <Dropdown.Item key={order_item.id}>

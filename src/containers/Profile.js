@@ -83,6 +83,57 @@ class PaymentHistory extends React.Component {
   }
 }
 
+class VideoInfo extends React.Component {
+  state = {
+    payments: []
+  };
+
+  componentDidMount() {
+    this.handleFetchPayments();
+  }
+
+  handleFetchPayments = () => {
+    this.setState({ loading: true });
+    authAxios
+      .get(paymentListURL)
+      .then(res => {
+        this.setState({
+          loading: false,
+          payments: res.data
+        });
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false });
+      });
+  };
+
+  render() {
+    const { payments } = this.state;
+    return (
+      <Table celled>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>ID</Table.HeaderCell>
+            <Table.HeaderCell>Amount</Table.HeaderCell>
+            <Table.HeaderCell>Date</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {payments.map(p => {
+            return (
+              <Table.Row key={p.id}>
+                <Table.Cell>{p.id}</Table.Cell>
+                <Table.Cell>${p.amount}</Table.Cell>
+                <Table.Cell>{new Date(p.timestamp).toUTCString()}</Table.Cell>
+              </Table.Row>
+            );
+          })}
+        </Table.Body>
+      </Table>
+    );
+  }
+}
+
 class AddressForm extends React.Component {
   state = {
     error: null,
@@ -209,7 +260,6 @@ class AddressForm extends React.Component {
           value={formData.street_address}
         />
         <Form.Input
-          required
           name="apartment_address"
           placeholder="Apartment address"
           onChange={this.handleChange}
@@ -286,6 +336,12 @@ class Profile extends React.Component {
       return "Billing Address";
     } else if (activeItem === "shippingAddress") {
       return "Shipping Address";
+    }
+    else if (activeItem === "Videos") {
+      return "Videos";
+    }
+    else if (activeItem === "Tags") {
+      return "Tags";
     }
     return "Payment History";
   };
@@ -454,6 +510,16 @@ class Profile extends React.Component {
         <Grid.Row>
           <Grid.Column width={6}>
             <Menu pointing vertical fluid>
+                <Menu.Item
+                  name="Videos"
+                  active={activeItem === "Videos"}
+                  onClick={() => this.handleItemClick("Videos")}
+                />
+                <Menu.Item
+                  name="Tags"
+                  active={activeItem === "Tags"}
+                  onClick={() => this.handleItemClick("Tags")}
+                />
               <Menu.Item
                 name="Billing Address"
                 active={activeItem === "billingAddress"}
