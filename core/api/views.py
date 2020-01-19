@@ -16,9 +16,9 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from core.models import Item, OrderItem, Order
 from .serializers import (
     ItemSerializer, OrderSerializer, ItemDetailSerializer, AddressSerializer,
-    PaymentSerializer, VideoSerializer
+    PaymentSerializer, VideoSerializer, MembershipSerializer, ContestSerializer, ContestDetailSerializer, EntrySerializer, UserProfileSerializer
 )
-from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation, Video
+from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation, Video, Membership, Contest, Entry
 
 
 import stripe
@@ -292,6 +292,10 @@ class AddressUpdateView(UpdateAPIView):
     serializer_class = AddressSerializer
     queryset = Address.objects.all()
 
+    def post(self, request, *args, **kwargs):
+        # slug = request.data.get('slug', None)
+        print(request.data, 'im here hoe!')
+
 
 class AddressDeleteView(DestroyAPIView):
     permission_classes = (IsAuthenticated, )
@@ -304,3 +308,41 @@ class PaymentListView(ListAPIView):
 
     def get_queryset(self):
         return Payment.objects.filter(user=self.request.user)
+
+
+class OrderListView(ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+
+
+class MembershipListView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = MembershipSerializer
+    queryset = Membership.objects.all().order_by('price')
+
+
+class EntryListView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = EntrySerializer
+    queryset = Entry.objects.all()
+
+
+class ContestListView(ListAPIView):
+    permission_classes = (AllowAny, )
+    serializer_class = ContestSerializer
+    queryset = Contest.objects.all()
+
+
+class ContestDetailView(RetrieveAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ContestDetailSerializer
+    queryset = Contest.objects.all()
+
+
+class UserDetailView(RetrieveAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = UserProfileSerializer
+    queryset = Contest.objects.all()

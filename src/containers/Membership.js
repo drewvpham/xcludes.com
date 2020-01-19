@@ -13,11 +13,12 @@ import {
   Message,
   Segment
 } from "semantic-ui-react";
-import { contestListURL, addToCartURL } from "../constants";
+import { membershipListURL, addToCartURL } from "../constants";
 import { fetchCart } from "../store/actions/cart";
 import { authAxios } from "../utils";
+import { CardElement } from "react-stripe-elements";
 
-class Play extends React.Component {
+class Membership extends React.Component {
   state = {
     loading: false,
     error: null,
@@ -27,15 +28,27 @@ class Play extends React.Component {
   componentDidMount() {
     this.setState({ loading: true });
     axios
-      .get(contestListURL)
+      .get(membershipListURL)
       .then(res => {
-        console.log(res.data, "asdfasdfs");
         this.setState({ data: res.data, loading: false });
       })
       .catch(err => {
         this.setState({ error: err, loading: false });
       });
   }
+
+  handleAddToCart = slug => {
+    this.setState({ loading: true });
+    authAxios
+      .post(addToCartURL, { slug })
+      .then(res => {
+        this.props.refreshCart();
+        this.setState({ loading: false });
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false });
+      });
+  };
 
   render() {
     const { data, loading, error } = this.state;
@@ -58,29 +71,34 @@ class Play extends React.Component {
           </Segment>
         )}
         <Card.Group>
-          {data.map(contest => {
+          {data.map(membership => {
             return (
-              <Card key={contest.id}>
+              <Card>
                 <Card.Content>
                   <Image
                     floated="right"
                     size="mini"
                     src="https://react.semantic-ui.com/images/avatar/large/steve.jpg"
                   />
-                  <Card.Header></Card.Header>
-
-                  <Card.Header>{contest.title}</Card.Header>
-                  <Card.Description>{contest.title}</Card.Description>
-                  <Card.Meta>{contest.entries.length} Entries</Card.Meta>
+                  <Card.Header>{membership.membership_type}</Card.Header>
+                  <Card.Meta>{membership.price}</Card.Meta>
+                  <Card.Description>
+                    Steve wants to add you to the group{" "}
+                    <strong>best friends</strong>
+                  </Card.Description>
+                  {membership.price === 72 ? (
+                    <Label as="a" color="blue" ribbon="right">
+                      Best Value
+                    </Label>
+                  ) : membership.price === 8 ? (
+                    <Label as="a" color="orange" ribbon="right">
+                      Most Popular
+                    </Label>
+                  ) : null}
                 </Card.Content>
                 <Card.Content extra>
                   <div className="ui two buttons">
-                    <Button basic color="green" size="tiny">
-                      1 Entry (1 Token)
-                    </Button>
-                    <Button basic color="red">
-                      6 Entries (5 Tokens)
-                    </Button>
+                    <Button color="yellow">Upgrade</Button>
                   </div>
                 </Card.Content>
               </Card>
@@ -92,4 +110,4 @@ class Play extends React.Component {
   }
 }
 
-export default Play;
+export default Membership;

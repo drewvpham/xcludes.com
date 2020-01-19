@@ -43,7 +43,7 @@ class RegistrationForm extends React.Component {
       >
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" color="teal" textAlign="center">
-            Signup to your account
+            Register your account
           </Header>
           {error && <p>{this.props.error.message}</p>}
 
@@ -96,7 +96,7 @@ class RegistrationForm extends React.Component {
                   loading={loading}
                   disabled={loading}
                 >
-                  Signup
+                  Register
                 </Button>
               </Segment>
             </Form>

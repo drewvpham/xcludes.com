@@ -4,9 +4,9 @@ from django.db import models
 from django.db.models import Sum
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
+import stripe
 
-
-# from django.contrib.auth import get_user_model
+# from django.contrib.auth import settings.AUTH_USER_MODEL
 from django_extensions.db.fields import AutoSlugField
 # from django.urls import reverse
 from django.template.defaultfilters import slugify
@@ -34,6 +34,34 @@ class UserProfile(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
     one_click_purchasing = models.BooleanField(default=False)
+    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
+    bio = models.TextField(max_length=500, blank=True)
+    location = models.CharField(max_length=30, blank=True)
+    favorite_videos = models.ManyToManyField('Video', blank=True)
+    favorite_tags = models.ManyToManyField(
+        'Tag', blank=True, related_name='favorite_tags')
+    exclude_tags = models.ManyToManyField(
+        'Tag', blank=True, related_name='exclude_tags')
+    favorite_categories = models.ManyToManyField(
+        'Category', blank=True, related_name='favorite_tags')
+    exclude_categories = models.ManyToManyField(
+        'Category', blank=True, related_name='exclude_tags')
+    favorite_pornstars = models.ManyToManyField(
+        'Pornstar', blank=True, related_name='favorite_tags')
+    exclude_pornstars = models.ManyToManyField(
+        'Pornstar', blank=True, related_name='exclude_tags')
+    gender = models.CharField(max_length=35, null=True)
+    race = models.CharField(max_length=35, null=True)
+    dob = models.DateField(null=True, blank=True)
+    orientation = models.CharField(max_length=35, null=True)
+    follows = models.ManyToManyField(
+        'self', related_name='followers', symmetrical=False, blank=True)
+    friends = models.ManyToManyField(
+        'self', related_name='friends_with', symmetrical=False, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_uploader = models.BooleanField(default=False)
+    one_click_purchasing = models.BooleanField(default=False)
+    tokens = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user.username
@@ -228,13 +256,33 @@ class Tag(models.Model):
         return self.name
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=35)
+    slug = models.CharField(max_length=250)
+    created_at = models.DateTimeField(auto_now_add=False)
+    image = models.ImageField(default='default.jpg', upload_to='categories')
+
+    def __str__(self):
+        return self.name
+
+
+class Pornstar(models.Model):
+    name = models.CharField(max_length=35)
+    slug = models.CharField(max_length=250)
+    created_at = models.DateTimeField(auto_now_add=False)
+
+    def __str__(self):
+        return self.name
+
+
 class Video(models.Model):
     title = models.CharField(max_length=500)
     slug = AutoSlugField(populate_from="title")
     description = models.CharField(max_length=500)
     videofile = models.FileField(upload_to='videos/', null=True)
     thumbnail = models.ImageField()
-    uploader = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    uploader = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True, blank=False)
     modified_at = models.DateTimeField(auto_now=True)
     private = models.BooleanField(default=True)
@@ -252,11 +300,13 @@ class Video(models.Model):
 class Rating(models.Model):
     score = models.IntegerField(null=True)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             null=True, on_delete=models.SET_NULL)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -264,31 +314,37 @@ class Comment(models.Model):
 
 
 class LikedVideos(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             null=True, on_delete=models.SET_NULL)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class SavedVideos(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             null=True, on_delete=models.SET_NULL)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     watched_at = models.DateTimeField(auto_now_add=True)
 
 
 class WatchedVideos(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             null=True, on_delete=models.SET_NULL)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Chat(models.Model):
-    admin = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
-    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='chats')
+    admin = models.ForeignKey(settings.AUTH_USER_MODEL,
+                              null=True, on_delete=models.SET_NULL)
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name='chats')
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Message(models.Model):
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages')
+    chat = models.ForeignKey(
+        Chat, on_delete=models.CASCADE, related_name='messages')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True,
                              on_delete=models.SET_NULL, related_name='sender')
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, null=True,
@@ -299,8 +355,8 @@ class Message(models.Model):
 
 
 MEMBERSHIP_CHOICES = (
-    ('Enterprise', 'ent'),
-    ('Professional', 'pro'),
+    ('Premium Monthly', 'premium monthly'),
+    ('Premium Yearly', 'premium yearly'),
     ('Free', 'free')
 )
 
@@ -311,8 +367,9 @@ class Membership(models.Model):
         choices=MEMBERSHIP_CHOICES,
         default='Free',
         max_length=30)
-    price = models.IntegerField(default=15)
+    price = models.IntegerField(default=0)
     stripe_plan_id = models.CharField(max_length=40)
+    # billing_frequency = models.CharField(max_length=40, null=True, blank=True)
 
     def __str__(self):
         return self.membership_type
@@ -368,3 +425,75 @@ class Subscription(models.Model):
         subscription = stripe.Subscription.retrieve(
             self.stripe_subscription_id)
         return datetime.fromtimestamp(subscription.current_period_end)
+
+
+class Contest(models.Model):
+    title = models.CharField(max_length=500)
+    slug = models.SlugField()
+    open_date = models.DateTimeField(
+        ("Starting Date"), help_text='Date entries open', blank=True, null=True)
+    close_date = models.DateTimeField(
+        ("Ending Date"), help_text='Date entries close', blank=True, null=True)
+    award_date = models.DateTimeField(
+        ("Award Date"), help_text='Date prizes are awarded', blank=True, null=True)
+    instant_win = models.BooleanField(("Instant Win"), default=False)
+    instant_win_odds = models.IntegerField(
+        ("Instant Win Odds"), help_text='1 in ____. Enter whole number', blank=True, null=True)
+    daily = models.BooleanField(("Daily Prizes"), default=False,
+                                help_text="A new winner can be won daily")
+    winner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    # code_type = models.CharField(("Code Type"), default="none", choices=CODE_TYPES, max_length=30)
+
+    class Meta:
+        verbose_name = ("Contest")
+        verbose_name_plural = ("Contests")
+
+    def __str__(self):
+        return '%s' % self.title
+
+
+class Code(models.Model):
+    code = models.CharField(
+        "Code", max_length=100, help_text='A code that has to be present at time of submission')
+    contest = models.ForeignKey(Contest, null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        verbose_name = ("Code")
+        verbose_name_plural = ("Codes")
+
+    def __unicode__(self):
+        return '%s' % self.code
+
+
+class Prize(models.Model):
+    name = models.CharField(("Prize"), max_length=150)
+    description = models.TextField(("Description"), default="")
+    image = models.ImageField(
+        ("Image"), upload_to='contest/prizes', blank=True, null=True)
+    date_available = models.DateField(
+        ("Date Prize is Available"), blank=True, help_text="Date that the prize is to be awarded")
+    number_available = models.IntegerField(
+        ("Number Available"), default=1, blank=True)
+    contest = models.ForeignKey(Contest, null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        verbose_name = ("Prize")
+        verbose_name_plural = ("Prizes")
+
+    def __str__(self):
+        return '%s' % self.name
+
+
+class Entry(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    code = models.CharField(("Code"), max_length=25, blank=True, null=True)
+    contest = models.ForeignKey(Contest, on_delete=models.SET_NULL, null=True)
+    winner = models.BooleanField(("Winner"), default=False)
+
+    def __str__(self):
+        return 'entry for: %s %s' % (self.user, self.contest)
+
+    def get_user(self):
+        return self.user.username

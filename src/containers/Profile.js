@@ -1,8 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import {
   Button,
+  Breadcrumb,
   Card,
   Dimmer,
   Divider,
@@ -25,7 +26,8 @@ import {
   addressUpdateURL,
   addressDeleteURL,
   userIDURL,
-  paymentListURL
+  paymentListURL,
+  orderListURL
 } from "../constants";
 import { authAxios } from "../utils";
 
@@ -83,6 +85,58 @@ class PaymentHistory extends React.Component {
   }
 }
 
+class OrderHistory extends React.Component {
+  state = {
+    payments: []
+  };
+
+  componentDidMount() {
+    this.handleFetchPayments();
+  }
+
+  handleFetchPayments = () => {
+    this.setState({ loading: true });
+    authAxios
+      .get(orderListURL)
+      .then(res => {
+        this.setState({
+          loading: false,
+          payments: res.data
+        });
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false });
+      });
+  };
+
+  render() {
+    const { payments } = this.state;
+    console.log(payments, "asdfasdf");
+    return (
+      <Table celled>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>ID</Table.HeaderCell>
+            <Table.HeaderCell>Amount</Table.HeaderCell>
+            <Table.HeaderCell>Date</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {payments.map(p => {
+            return (
+              <Table.Row key={p.id}>
+                <Table.Cell>{p.id}</Table.Cell>
+                <Table.Cell>${p.amount}</Table.Cell>
+                <Table.Cell>{new Date(p.timestamp).toUTCString()}</Table.Cell>
+              </Table.Row>
+            );
+          })}
+        </Table.Body>
+      </Table>
+    );
+  }
+}
+
 class VideoInfo extends React.Component {
   state = {
     payments: []
@@ -110,26 +164,51 @@ class VideoInfo extends React.Component {
   render() {
     const { payments } = this.state;
     return (
-      <Table celled>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>ID</Table.HeaderCell>
-            <Table.HeaderCell>Amount</Table.HeaderCell>
-            <Table.HeaderCell>Date</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {payments.map(p => {
-            return (
-              <Table.Row key={p.id}>
-                <Table.Cell>{p.id}</Table.Cell>
-                <Table.Cell>${p.amount}</Table.Cell>
-                <Table.Cell>{new Date(p.timestamp).toUTCString()}</Table.Cell>
-              </Table.Row>
-            );
-          })}
-        </Table.Body>
-      </Table>
+      <Breadcrumb>
+        <Breadcrumb.Section link>Uploads</Breadcrumb.Section>
+        <Breadcrumb.Divider />
+        <Breadcrumb.Section link>Private Copies</Breadcrumb.Section>
+        <Breadcrumb.Divider />
+        <Breadcrumb.Section link>Playlists</Breadcrumb.Section>
+        <Breadcrumb.Divider />
+        <Breadcrumb.Section link>Favorites</Breadcrumb.Section>
+      </Breadcrumb>
+    );
+  }
+}
+
+class Tags extends React.Component {
+  state = {
+    payments: []
+  };
+
+  componentDidMount() {
+    this.handleFetchPayments();
+  }
+
+  handleFetchPayments = () => {
+    this.setState({ loading: true });
+    authAxios
+      .get(paymentListURL)
+      .then(res => {
+        this.setState({
+          loading: false,
+          payments: res.data
+        });
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false });
+      });
+  };
+
+  render() {
+    const { payments } = this.state;
+    return (
+      <Breadcrumb>
+        <Breadcrumb.Section link>Include</Breadcrumb.Section>
+        <Breadcrumb.Divider />
+        <Breadcrumb.Section link>Exclude</Breadcrumb.Section>
+      </Breadcrumb>
     );
   }
 }
@@ -336,12 +415,14 @@ class Profile extends React.Component {
       return "Billing Address";
     } else if (activeItem === "shippingAddress") {
       return "Shipping Address";
-    }
-    else if (activeItem === "Videos") {
+    } else if (activeItem === "Videos") {
       return "Videos";
-    }
-    else if (activeItem === "Tags") {
+    } else if (activeItem === "Tags") {
       return "Tags";
+    } else if (activeItem === "Orders") {
+      return "Orders";
+    } else if (activeItem === "Account") {
+      return "Account";
     }
     return "Payment History";
   };
@@ -376,6 +457,7 @@ class Profile extends React.Component {
     authAxios
       .get(userIDURL)
       .then(res => {
+        console.log(res.data.userID, "asdfasdf");
         this.setState({ userID: res.data.userID });
       })
       .catch(err => {
@@ -510,16 +592,21 @@ class Profile extends React.Component {
         <Grid.Row>
           <Grid.Column width={6}>
             <Menu pointing vertical fluid>
-                <Menu.Item
-                  name="Videos"
-                  active={activeItem === "Videos"}
-                  onClick={() => this.handleItemClick("Videos")}
-                />
-                <Menu.Item
-                  name="Tags"
-                  active={activeItem === "Tags"}
-                  onClick={() => this.handleItemClick("Tags")}
-                />
+              <Menu.Item
+                name="Account"
+                active={activeItem === "Account"}
+                onClick={() => this.handleItemClick("Account")}
+              />
+              <Menu.Item
+                name="Videos"
+                active={activeItem === "Videos"}
+                onClick={() => this.handleItemClick("Videos")}
+              />
+              <Menu.Item
+                name="Tags"
+                active={activeItem === "Tags"}
+                onClick={() => this.handleItemClick("Tags")}
+              />
               <Menu.Item
                 name="Billing Address"
                 active={activeItem === "billingAddress"}
@@ -531,6 +618,11 @@ class Profile extends React.Component {
                 onClick={() => this.handleItemClick("shippingAddress")}
               />
               <Menu.Item
+                name="Orders"
+                active={activeItem === "Orders"}
+                onClick={() => this.handleItemClick("Orders")}
+              />
+              <Menu.Item
                 name="Payment history"
                 active={activeItem === "paymentHistory"}
                 onClick={() => this.handleItemClick("paymentHistory")}
@@ -540,8 +632,17 @@ class Profile extends React.Component {
           <Grid.Column width={10}>
             <Header>{this.handleGetActiveItem()}</Header>
             <Divider />
+
             {activeItem === "paymentHistory" ? (
               <PaymentHistory />
+            ) : activeItem === "Orders" ? (
+              <OrderHistory />
+            ) : activeItem === "Videos" ? (
+              <VideoInfo />
+            ) : activeItem === "Tags" ? (
+              <Tags />
+            ) : activeItem === "Account" ? (
+              <Tags />
             ) : (
               this.renderAddresses()
             )}

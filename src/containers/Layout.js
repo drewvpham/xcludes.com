@@ -24,23 +24,24 @@ class CustomLayout extends React.Component {
     const { authenticated, cart, loading } = this.props;
     return (
       <div>
-        <Menu inverted>
+        <Menu borderless size="mini">
           <Container>
             <Link to="/">
               <Menu.Item header>Videos</Menu.Item>
             </Link>
+            <Link to="/membership">
+              <Menu.Item header>Premium</Menu.Item>
+            </Link>
             <Link to="/products">
               <Menu.Item header>Shop</Menu.Item>
             </Link>
-            <Link to="/products">
+            <Link to="/play">
               <Menu.Item header>Play</Menu.Item>
             </Link>
+
             {authenticated ? (
               <React.Fragment>
                 <Menu.Menu position="right">
-                  <Link to="/profile">
-                    <Menu.Item>Profile</Menu.Item>
-                  </Link>
                   <Dropdown
                     icon="cart"
                     loading={loading}
@@ -51,7 +52,6 @@ class CustomLayout extends React.Component {
                     <Dropdown.Menu>
                       {cart !== null ? (
                         <React.Fragment header>
-
                           {cart.order_items.map(order_item => {
                             return (
                               <Dropdown.Item key={order_item.id}>
@@ -77,6 +77,12 @@ class CustomLayout extends React.Component {
                       )}
                     </Dropdown.Menu>
                   </Dropdown>
+                  <Link to="/play">
+                    <Menu.Item header>Tokens</Menu.Item>
+                  </Link>
+                  <Link to="/profile">
+                    <Menu.Item header>Profile</Menu.Item>
+                  </Link>
                   <Menu.Item header onClick={() => this.props.logout()}>
                     Logout
                   </Menu.Item>

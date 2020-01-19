@@ -53,7 +53,6 @@ class ProductDetail extends React.Component {
       .get(productDetailURL(params.productID))
       .then(res => {
         this.setState({ data: res.data, loading: false });
-        console.log(res.data);
       })
       .catch(err => {
         this.setState({ error: err, loading: false });
@@ -138,9 +137,23 @@ class ProductDetail extends React.Component {
                   </React.Fragment>
                 }
                 description={item.description}
+                extra={
+                  <React.Fragment>
+                    <Button
+                      fluid
+                      color="yellow"
+                      floated="right"
+                      icon
+                      labelPosition="right"
+                      onClick={this.handleToggleForm}
+                    >
+                      Add to cart
+                      <Icon name="cart plus" />
+                    </Button>
+                  </React.Fragment>
+                }
               />
-
-              {data.variations && (
+              {formVisible && (
                 <React.Fragment>
                   <Divider />
                   <Form onSubmit={() => this.handleAddToCart(item.slug)}>
@@ -166,16 +179,7 @@ class ProductDetail extends React.Component {
                         </Form.Field>
                       );
                     })}
-                    <Form.Button
-                      fluid
-                      color="yellow"
-                      floated="right"
-                      icon
-                      labelPosition="right"
-                    >
-                      Add to Cart
-                      <Icon name="cart plus" />
-                    </Form.Button>
+                    <Form.Button primary>Add</Form.Button>
                   </Form>
                 </React.Fragment>
               )}

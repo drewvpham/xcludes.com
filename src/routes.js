@@ -12,6 +12,7 @@ import Checkout from "./containers/Checkout";
 import Profile from "./containers/Profile";
 import VideoList from "./containers/VideoList";
 import Play from "./containers/Play";
+import Membership from "./containers/Membership";
 
 const BaseRouter = () => (
   <Hoc>
@@ -24,6 +25,8 @@ const BaseRouter = () => (
     <Route path="/profile" component={Profile} />
     <Route path="/videos" component={VideoList} />
     <Route path="/play" component={Play} />
+    <Route path="/play/:contestID" component={Play} />
+    <Route path="/membership" component={Membership} />
     <Route exact path="/" component={HomepageLayout} />
   </Hoc>
 );

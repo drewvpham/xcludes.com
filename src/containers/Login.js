@@ -4,6 +4,7 @@ import {
   Form,
   Grid,
   Header,
+  Icon,
   Message,
   Segment
 } from "semantic-ui-react";
@@ -40,9 +41,7 @@ class LoginForm extends React.Component {
         verticalAlign="middle"
       >
         <Grid.Column style={{ maxWidth: 450 }}>
-          <Header as="h2" color="teal" textAlign="center">
-            Log-in to your account
-          </Header>
+          <Header as="h2" color="teal" textAlign="center"></Header>
           {error && <p>{this.props.error.message}</p>}
 
           <React.Fragment>
@@ -80,7 +79,8 @@ class LoginForm extends React.Component {
               </Segment>
             </Form>
             <Message>
-              New to us? <NavLink to="/signup">Sign Up</NavLink>
+              <Icon name="warning circle" />
+              Don''t have an account? <NavLink to="/signup">Register</NavLink>
             </Message>
           </React.Fragment>
         </Grid.Column>
