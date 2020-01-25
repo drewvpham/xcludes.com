@@ -18,7 +18,11 @@ from .views import (
     OrderListView,
     MembershipListView,
     ContestListView,
-    ContestDetailView
+    ContestDetailView,
+    UpdateTickets,
+    TicketDetailView,
+    EntryListView,
+    EntryCreateView
 )
 
 urlpatterns = [
@@ -31,7 +35,7 @@ urlpatterns = [
     path('addresses/<pk>/delete/',
          AddressDeleteView.as_view(), name='address-delete'),
     path('products/', ItemListView.as_view(), name='product-list'),
-    path('products/<pk>/', ItemDetailView.as_view(), name='product-detail'),
+    path('products/<slug>/', ItemDetailView.as_view(), name='product-detail'),
     path('add-to-cart/', AddToCartView.as_view(), name='add-to-cart'),
     path('order-summary/', OrderDetailView.as_view(), name='order-summary'),
     path('checkout/', PaymentView.as_view(), name='checkout'),
@@ -44,7 +48,12 @@ urlpatterns = [
     path('orders/', OrderListView.as_view(), name='order-list'),
     path('membership/', MembershipListView.as_view(), name='membership-list'),
     path('play/', ContestListView.as_view(), name='contest-list'),
-    path('play/<pk>/', ContestDetailView.as_view(), name='contest-detail'),
+    path('play/<slug>/', ContestDetailView.as_view(), name='contest-detail'),
+    path('profile-summary/', TicketDetailView.as_view(), name='profile-summary'),
+    path('entries/',
+         EntryListView.as_view(), name='entries-list'),
+    path('entries/create/',
+         EntryCreateView.as_view(), name='entries-create'),
 
 
 ]

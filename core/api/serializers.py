@@ -190,6 +190,36 @@ class ItemDetailSerializer(serializers.ModelSerializer):
         return VariationSerializer(obj.variation_set.all(), many=True).data
 
 
+# class ItemSerializer(serializers.ModelSerializer):
+#     category = serializers.SerializerMethodField()
+#     label = serializers.SerializerMethodField()
+#     variations = serializers.SerializerMethodField()
+#
+#     class Meta:
+#         model = Item
+#         fields = (
+#             'id',
+#             'title',
+#             'price',
+#             'discount_price',
+#             'category',
+#             'label',
+#             'slug',
+#             'description',
+#             'image',
+#             'variations'
+#         )
+#
+#     def get_category(self, obj):
+#         return obj.get_category_display()
+#
+#     def get_label(self, obj):
+#         return obj.get_label_display()
+#
+#     def get_variations(self, obj):
+#         return VariationSerializer(obj.variation_set.all(), many=True).data
+
+
 class AddressSerializer(serializers.ModelSerializer):
     country = CountryField()
 
@@ -241,6 +271,7 @@ class EntrySerializer(serializers.ModelSerializer):
             'code',
             'contest',
             'winner',
+            'created_date'
 
         )
 
@@ -282,9 +313,58 @@ class ContestDetailSerializer(serializers.ModelSerializer):
             'entries'
         )
 
+    def get_entries(self, obj):
+
+        return EntrySerializer(obj.entry_set.all(), many=True).data
+
 
 class VideoSerializer(serializers.ModelSerializer):
-    pass
+    categories = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
+    pornstars = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Video
+        fields = (
+            'title',
+            'slug',
+            'description',
+            'videofile',
+            'thumbnail',
+            'uploader',
+            'created_at',
+            'modified_at',
+            'private',
+            'tags',
+            'categories',
+            'pornstars'
+        )
+
+    def get_categories(self, obj):
+        return CategorySerializer(obj.pornstar_set.all(), many=True).data
+
+    def get_tags(self, obj):
+        return TagSerializer(obj.pornstar_set.all(), many=True).data
+
+    def get_pornstars(self, obj):
+        return PornstarSerializer(obj.pornstar_set.all(), many=True).data
+
+
+class VideoDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        fields = (
+            'title',
+            'slug',
+            'description',
+            'videofile',
+            'thumbnail',
+            'uploader',
+            'created_at',
+            'modified_at',
+            'private',
+            'tags'
+        )
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -304,6 +384,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_active',
             'is_uploader',
             'one_click_purchasing',
+            'tickets'
         )
 
 
@@ -315,4 +396,5 @@ class CategorySerializer(serializers.ModelSerializer):
             'id',
             'name',
             'slug',
+
         )

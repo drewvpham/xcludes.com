@@ -22,6 +22,7 @@ import {
 } from "semantic-ui-react";
 import { productDetailURL, addToCartURL } from "../constants";
 import { fetchCart } from "../store/actions/cart";
+import { fetchProfile } from "../store/actions/profile";
 import { authAxios } from "../utils";
 
 class ProductDetail extends React.Component {
@@ -50,12 +51,12 @@ class ProductDetail extends React.Component {
     } = this.props;
     this.setState({ loading: true });
     axios
-      .get(productDetailURL(params.productID))
+      .get(productDetailURL(params.slug))
       .then(res => {
         this.setState({ data: res.data, loading: false });
-        console.log(res.data);
       })
       .catch(err => {
+        console.log(err);
         this.setState({ error: err, loading: false });
       });
   };
@@ -63,7 +64,6 @@ class ProductDetail extends React.Component {
   handleFormatData = formData => {
     // convert {colour: 1, size: 2} to [1,2] - they're all variations
     return Object.keys(formData).map(key => {
-      console.log(formData);
       return formData[key];
     });
   };
@@ -95,6 +95,7 @@ class ProductDetail extends React.Component {
   render() {
     const { data, error, formData, formVisible, loading } = this.state;
     const item = data;
+    console.log(item, "items");
     return (
       <Container>
         {error && (
@@ -217,7 +218,8 @@ class ProductDetail extends React.Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    refreshCart: () => dispatch(fetchCart())
+    refreshCart: () => dispatch(fetchCart()),
+    refreshProfile: () => dispatch(fetchProfile())
   };
 };
 

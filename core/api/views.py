@@ -1,5 +1,6 @@
 from django_countries import countries
 from django.db.models import Q
+from django.utils import timezone
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
@@ -16,7 +17,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from core.models import Item, OrderItem, Order
 from .serializers import (
     ItemSerializer, OrderSerializer, ItemDetailSerializer, AddressSerializer,
-    PaymentSerializer, VideoSerializer, MembershipSerializer, ContestSerializer, ContestDetailSerializer, EntrySerializer, UserProfileSerializer
+    PaymentSerializer, VideoSerializer, VideoDetailSerializer, MembershipSerializer, ContestSerializer, ContestDetailSerializer, EntrySerializer, UserProfileSerializer
 )
 from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation, Video, Membership, Contest, Entry
 
@@ -32,6 +33,13 @@ class VideoListView(ListAPIView):
     queryset = Video.objects.all()
 
 
+class VideoDetailView(RetrieveAPIView):
+    lookup_field = 'slug'
+    permission_classes = (AllowAny,)
+    serializer_class = VideoDetailSerializer
+    queryset = Video.objects.all()
+
+
 class UserIDView(APIView):
     def get(self, request, *args, **kwargs):
         return Response({'userID': request.user.id}, status=HTTP_200_OK)
@@ -44,6 +52,8 @@ class ItemListView(ListAPIView):
 
 
 class ItemDetailView(RetrieveAPIView):
+
+    lookup_field = 'slug'
     permission_classes = (AllowAny,)
     serializer_class = ItemDetailSerializer
     queryset = Item.objects.all()
@@ -85,8 +95,20 @@ class OrderItemDeleteView(DestroyAPIView):
     queryset = OrderItem.objects.all()
 
 
+class UpdateTickets(APIView):
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        slug = request.data.get('id', None)
+        count = request.data.get('count', None)
+        print('slug', slug, 'count', count)
+        user_profile = UserProfile.objects.filter(user=request.user).first()
+        if slug is None:
+            return Response({"message": "Invalid request"}, status=HTTP_400_BAD_REQUEST)
+
+
 class AddToCartView(APIView):
     def post(self, request, *args, **kwargs):
+
         slug = request.data.get('slug', None)
         variations = request.data.get('variations', [])
         if slug is None:
@@ -96,6 +118,7 @@ class AddToCartView(APIView):
 
         minimum_variation_count = Variation.objects.filter(item=item).count()
         if len(variations) < minimum_variation_count:
+            print('sending error message', "Please specify the required variation types")
             return Response({"message": "Please specify the required variation types"}, status=HTTP_400_BAD_REQUEST)
 
         order_item_qs = OrderItem.objects.filter(
@@ -147,6 +170,19 @@ class OrderDetailView(RetrieveAPIView):
         except ObjectDoesNotExist:
             raise Http404("You do not have an active order")
             # return Response({"message": "You do not have an active order"}, status=HTTP_400_BAD_REQUEST)
+
+
+class TicketDetailView(RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        try:
+            profile = UserProfile.objects.get(user=self.request.user)
+            print(profile, 'profile')
+            return profile
+        except ObjectDoesNotExist:
+            raise Http404("You do not have an active order")
 
 
 class PaymentView(APIView):
@@ -337,6 +373,7 @@ class ContestListView(ListAPIView):
 
 
 class ContestDetailView(RetrieveAPIView):
+    lookup_field = 'slug'
     permission_classes = (AllowAny,)
     serializer_class = ContestDetailSerializer
     queryset = Contest.objects.all()
@@ -346,3 +383,32 @@ class UserDetailView(RetrieveAPIView):
     permission_classes = (AllowAny,)
     serializer_class = UserProfileSerializer
     queryset = Contest.objects.all()
+
+
+class EntryCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        slug = request.data.get('slug', None)
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+        user_profile = User.objects.get(username=self.request.user).userprofile
+        user_tickets = user_profile.tickets
+        num_entries = request.data.get('numEntries', None)
+        tickets_spent = request.data.get('ticketCost', None)
+
+        if user_tickets < tickets_spent:
+            print('in here')
+            raise Http404("You do not have an active order")
+        if slug is None:
+            return Response({"message": "Invalid data"}, status=HTTP_400_BAD_REQUEST)
+        contest = get_object_or_404(Contest, slug=slug)
+        for entry in range(0, num_entries):
+            entry = Entry.objects.create(
+                user=self.request.user,
+                contest=contest,
+                created_date=timezone.now()
+            )
+            user_profile.tickets -= 1
+            user_profile.save()
+        return Response(status=HTTP_200_OK)

@@ -6,3 +6,7 @@ export const AUTH_LOGOUT = "AUTH_LOGOUT";
 export const CART_START = "CART_START";
 export const CART_SUCCESS = "CART_SUCCESS";
 export const CART_FAIL = "CART_FAIL";
+
+export const PROFILE_START = "PROFILE_START";
+export const PROFILE_SUCCESS = "PROFILE_SUCCESS";
+export const PROFILE_FAIL = "PROFILE_FAIL";

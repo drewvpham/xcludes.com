@@ -111,7 +111,6 @@ class OrderHistory extends React.Component {
 
   render() {
     const { payments } = this.state;
-    console.log(payments, "asdfasdf");
     return (
       <Table celled>
         <Table.Header>
@@ -457,7 +456,6 @@ class Profile extends React.Component {
     authAxios
       .get(userIDURL)
       .then(res => {
-        console.log(res.data.userID, "asdfasdf");
         this.setState({ userID: res.data.userID });
       })
       .catch(err => {

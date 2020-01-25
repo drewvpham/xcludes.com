@@ -37,7 +37,6 @@ class ProductList extends React.Component {
       .get(productListURL)
       .then(res => {
         this.setState({ data: res.data, loading: false });
-        console.log(res.data);
       })
       .catch(err => {
         this.setState({ error: err, loading: false });
@@ -48,7 +47,6 @@ class ProductList extends React.Component {
   handleFormatData = formData => {
     // convert {colour: 1, size: 2} to [1,2] - they're all variations
     return Object.keys(formData).map(key => {
-      console.log(formData);
       return formData[key];
     });
   };
@@ -97,8 +95,8 @@ class ProductList extends React.Component {
         {error && (
           <Message
             error
-            header="There was some errors with your submission"
-            content={JSON.stringify(error)}
+            header="There was an error with your submission:"
+            content={JSON.stringify(error.message)}
           />
         )}
         {loading && (
@@ -114,14 +112,14 @@ class ProductList extends React.Component {
         <Card.Group>
           {data.map(item => {
             return (
-              <Card key={item.id}>
+              <Card key={item.slug}>
                 <Image
                   src={item.image}
                   wrapped
                   ui={false}
                   as="a"
                   onClick={() =>
-                    this.props.history.push(`/products/${item.id}`)
+                    this.props.history.push(`/products/${item.slug}`)
                   }
                 />
                 <Card.Content>
@@ -147,7 +145,6 @@ class ProductList extends React.Component {
                 <Card.Content extra>
                   {item.variations.length > 0 && (
                     <React.Fragment>
-                      <Divider />
                       <Form onSubmit={() => this.handleAddToCart(item.slug)}>
                         {item.variations.map(v => {
                           const name = v.name.toLowerCase();
@@ -171,20 +168,20 @@ class ProductList extends React.Component {
                             </Form.Field>
                           );
                         })}
-                        <Form.Button primary>Add</Form.Button>
+
+                        <Form.Button
+                          fluid
+                          color="yellow"
+                          icon
+                          labelPosition="right"
+                        >
+                          Add to Cart
+                          <Icon name="cart plus" />
+                        </Form.Button>
                       </Form>
                     </React.Fragment>
                   )}
-                  <Button
-                    fluid
-                    color="yellow"
-                    icon
-                    labelPosition="right"
-                    onClick={this.handleAddToCart}
-                  >
-                    Add to cart
-                    <Icon name="cart plus" />
-                  </Button>
+                  <br />
                   <Button fluid icon labelPosition="right" color="orange">
                     Buy now 1 click
                     <Icon name="cart plus" />

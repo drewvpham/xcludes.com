@@ -61,7 +61,7 @@ class UserProfile(models.Model):
     is_active = models.BooleanField(default=True)
     is_uploader = models.BooleanField(default=False)
     one_click_purchasing = models.BooleanField(default=False)
-    tokens = models.IntegerField(default=0)
+    tickets = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user.username
@@ -287,6 +287,8 @@ class Video(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     private = models.BooleanField(default=True)
     tags = models.ManyToManyField(Tag, blank=True, null=True)
+    categories = models.ManyToManyField(Category, blank=True, null=True)
+    pornstars = models.ManyToManyField(Pornstar, blank=True, null=True)
 
     def __str__(self):
         return self.title + ": " + str(self.videofile)
@@ -442,7 +444,7 @@ class Contest(models.Model):
     daily = models.BooleanField(("Daily Prizes"), default=False,
                                 help_text="A new winner can be won daily")
     winner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
     # code_type = models.CharField(("Code Type"), default="none", choices=CODE_TYPES, max_length=30)
 
     class Meta:
@@ -486,14 +488,15 @@ class Prize(models.Model):
 
 
 class Entry(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     code = models.CharField(("Code"), max_length=25, blank=True, null=True)
     contest = models.ForeignKey(Contest, on_delete=models.SET_NULL, null=True)
     winner = models.BooleanField(("Winner"), default=False)
+    created_date = models.DateTimeField()
 
     def __str__(self):
         return 'entry for: %s %s' % (self.user, self.contest)
 
     def get_user(self):
-        return self.user.username
+        return self.user

@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import axios from "axios";
 import {
   Container,
@@ -13,23 +14,23 @@ import {
   Message,
   Segment
 } from "semantic-ui-react";
-import { contestListURL, addToCartURL } from "../constants";
-import { fetchCart } from "../store/actions/cart";
+import { playListURL, spendTicketsURL } from "../constants";
+import { fetchProfile } from "../store/actions/profile";
 import { authAxios } from "../utils";
 
-class Play extends React.Component {
+class PlayList extends React.Component {
   state = {
     loading: false,
     error: null,
+    formData: {},
     data: []
   };
 
   componentDidMount() {
     this.setState({ loading: true });
     axios
-      .get(contestListURL)
+      .get(playListURL)
       .then(res => {
-        console.log(res.data, "asdfasdfs");
         this.setState({ data: res.data, loading: false });
       })
       .catch(err => {
@@ -67,9 +68,15 @@ class Play extends React.Component {
                     size="mini"
                     src="https://react.semantic-ui.com/images/avatar/large/steve.jpg"
                   />
-                  <Card.Header></Card.Header>
 
-                  <Card.Header>{contest.title}</Card.Header>
+                  <Card.Header
+                    as="a"
+                    onClick={() =>
+                      this.props.history.push(`/play/${contest.slug}`)
+                    }
+                  >
+                    asdfas
+                  </Card.Header>
                   <Card.Description>{contest.title}</Card.Description>
                   <Card.Meta>{contest.entries.length} Entries</Card.Meta>
                 </Card.Content>
@@ -92,4 +99,13 @@ class Play extends React.Component {
   }
 }
 
-export default Play;
+const mapDispatchToProps = dispatch => {
+  return {
+    refreshProfile: () => dispatch(fetchProfile())
+  };
+};
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(PlayList);

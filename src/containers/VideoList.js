@@ -18,13 +18,34 @@ import {
 import { membershipListURL, addToCartURL } from "../constants";
 import { fetchCart } from "../store/actions/cart";
 import { authAxios } from "../utils";
-
+import VideoFilter from "./VideoFilter";
+import { videoListURL } from "../constants";
 class VideoList extends React.Component {
-  state = { activeItem: "home" };
+  state = {
+    loading: false,
+    error: null,
+    formData: {},
+    activeItem: "home",
+    data: []
+  };
+
+  componentDidMount() {
+    this.setState({ loading: true });
+    axios
+      .get(videoListURL)
+      .then(res => {
+        console.log(res.data, "video list data");
+        this.setState({ data: res.data, loading: false });
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false });
+      });
+  }
+
   handleItemClick = (e, { name }) => this.setState({ activeItem: name });
 
   render() {
-    const { activeItem } = this.state;
+    const { activeItem, data } = this.state;
 
     return (
       <Container>
@@ -73,9 +94,42 @@ class VideoList extends React.Component {
           />
           <Menu.Menu position="right">
             <Menu.Item>
+              <VideoFilter />
+            </Menu.Item>
+          </Menu.Menu>
+          <Menu.Menu position="right">
+            <Menu.Item>
               <Input icon="search" placeholder="Search..." />
             </Menu.Item>
           </Menu.Menu>
+        </Menu>
+
+        <Menu secondary size="mini">
+          <Menu.Item
+            name="Today"
+            active={activeItem === "home"}
+            onClick={this.handleItemClick}
+          />
+          <Menu.Item
+            name="Week"
+            active={activeItem === "messages"}
+            onClick={this.handleItemClick}
+          />
+          <Menu.Item
+            name="Month"
+            active={activeItem === "friends"}
+            onClick={this.handleItemClick}
+          />
+          <Menu.Item
+            name="Year"
+            active={activeItem === "friends"}
+            onClick={this.handleItemClick}
+          />
+          <Menu.Item
+            name="All Time"
+            active={activeItem === "logout"}
+            onClick={this.handleItemClick}
+          />
         </Menu>
       </Container>
     );

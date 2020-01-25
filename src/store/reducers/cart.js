@@ -15,6 +15,7 @@ const cartStart = (state, action) => {
 };
 
 const cartSuccess = (state, action) => {
+  console.log("cart success");
   return updateObject(state, {
     shoppingCart: action.data,
     error: null,
