@@ -33,8 +33,24 @@ class VideoDetail extends React.Component {
     formData: {}
   };
 
+  handleFetchVideo = () => {
+    const {
+      match: { params }
+    } = this.props;
+    this.setState({ loading: true });
+    axios
+      .get(videoDetailURL(params.slug))
+      .then(res => {
+        this.setState({ data: res.data, loading: false });
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false });
+      });
+  };
+
   render() {
     const { data, error, loading } = this.state;
+
     return (
       <Container>
         {error && (
@@ -54,7 +70,7 @@ class VideoDetail extends React.Component {
         )}
         <Grid columns={2} divided>
           <Grid.Row>
-            <Grid.Column></Grid.Column>
+            <Grid.Column>asdfasdfasd</Grid.Column>
           </Grid.Row>
         </Grid>
       </Container>

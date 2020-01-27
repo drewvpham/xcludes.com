@@ -27,7 +27,6 @@ class ProductList extends React.Component {
     loading: false,
     error: null,
     formData: {},
-
     data: []
   };
 
@@ -126,7 +125,7 @@ class ProductList extends React.Component {
                   <Card.Header
                     as="a"
                     onClick={() =>
-                      this.props.history.push(`/products/${item.id}`)
+                      this.props.history.push(`/products/${item.slug}`)
                     }
                   >
                     {item.title}
@@ -143,7 +142,7 @@ class ProductList extends React.Component {
                   <Card.Description>{item.description}</Card.Description>
                 </Card.Content>
                 <Card.Content extra>
-                  {item.variations.length > 0 && (
+                  {item.variations && (
                     <React.Fragment>
                       <Form onSubmit={() => this.handleAddToCart(item.slug)}>
                         {item.variations.map(v => {

@@ -56,7 +56,6 @@ class ProductDetail extends React.Component {
         this.setState({ data: res.data, loading: false });
       })
       .catch(err => {
-        console.log(err);
         this.setState({ error: err, loading: false });
       });
   };
@@ -95,7 +94,12 @@ class ProductDetail extends React.Component {
   render() {
     const { data, error, formData, formVisible, loading } = this.state;
     const item = data;
-    console.log(item, "items");
+    console.log(
+      item.variations,
+      "variations",
+      typeof item.variations,
+      typeof data.variations
+    );
     return (
       <Container>
         {error && (

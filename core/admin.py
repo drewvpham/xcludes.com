@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (
     Item, OrderItem, Order, Payment, Coupon, Refund,
-    Address, UserProfile, Variation, ItemVariation, Membership, UserMembership, Subscription, Contest, Code, Prize, Entry, Video, Category, Tag, Pornstar
+    Address, UserProfile, Variation, ItemVariation, Membership, UserMembership, Subscription, Contest, Code, Prize, Entry, Video, Category, Tag, Pornstar, VideoTag, VideoCategory, VideoPornstar
 )
 
 
@@ -79,6 +79,9 @@ class VariationAdmin(admin.ModelAdmin):
     inlines = [ItemVariationInLineAdmin]
 
 
+admin.site.register(VideoCategory)
+admin.site.register(VideoPornstar)
+admin.site.register(VideoTag)
 admin.site.register(Video)
 admin.site.register(Category)
 admin.site.register(Tag)

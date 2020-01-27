@@ -27,7 +27,6 @@ const profileSuccess = (state, action) => {
 };
 
 const profileFail = (state, action) => {
-  console.log("fail");
   return updateObject(state, {
     error: action.error,
     profile_loading: false

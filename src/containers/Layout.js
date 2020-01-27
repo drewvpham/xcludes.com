@@ -31,6 +31,7 @@ class CustomLayout extends React.Component {
       loading,
       ticket_loading
     } = this.props;
+
     return (
       <div>
         <Menu borderless size="mini">
@@ -54,7 +55,14 @@ class CustomLayout extends React.Component {
                   <Dropdown
                     icon="cart"
                     loading={loading}
-                    text={`${cart !== null ? cart.order_items.length : 0}`}
+                    text={`${
+                      cart !== null
+                        ? cart.order_items.reduce(
+                            (a, { quantity }) => a + quantity,
+                            0
+                          )
+                        : 0
+                    }`}
                     pointing
                     className="link item"
                   >
@@ -129,25 +137,34 @@ class CustomLayout extends React.Component {
                 <Header inverted as="h4" content="Company" />
                 <List link inverted>
                   <List.Item as="a">Contact us</List.Item>
-                  <List.Item as="a">About</List.Item>
-                  <List.Item as="a">Register</List.Item>
+                  <List.Item as="a">Support</List.Item>
+                  <List.Item as="a">Content Partnership</List.Item>
                 </List>
               </Grid.Column>
               <Grid.Column width={3}>
                 <Header inverted as="h4" content="Social" />
                 <List link inverted>
                   <List.Item as="a">Twitter</List.Item>
-                  <List.Item as="a">Instagram</List.Item>
-                  <List.Item as="a">Link Three</List.Item>
-                  <List.Item as="a">Link Four</List.Item>
+                  <List.Item
+                    as="a"
+                    href="https://www.instagram.com/xcludesofficial/"
+                  >
+                    Instagram
+                  </List.Item>
+                  <List.Item
+                    as="a"
+                    href="https://reddit.com/user/XcludesOfficial"
+                  >
+                    Reddit
+                  </List.Item>
                 </List>
               </Grid.Column>
               <Grid.Column width={3}>
-                <Header inverted as="h4" content="Legal" />
+                <Header inverted as="h4" content="Information" />
                 <List link inverted>
                   <List.Item as="a">Privacy policy</List.Item>
-                  <List.Item as="a">Terms of use</List.Item>
-                  <List.Item as="a">Link Three</List.Item>
+                  <List.Item as="a">Terms & Conditions</List.Item>
+                  <List.Item as="a">Content Removal/DMCA</List.Item>
                   <List.Item as="a">Link Four</List.Item>
                 </List>
               </Grid.Column>

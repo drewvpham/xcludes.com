@@ -31,5 +31,7 @@ export const spendTicketsURL = (id, count) =>
 
 export const profileSummaryURL = `${endpoint}/profile-summary/`;
 
-export const contestEntryURL = `${endpoint}/entries/create/`;
+export const contestEntriesURL = `${endpoint}/entries/create/`;
 export const videoListURL = `${endpoint}/videos/`;
+export const videoDetailURL = slug => `${endpoint}/videos/${slug}/`;
+export const videoUploadURL = slug => `${endpoint}/videos/upload/`;

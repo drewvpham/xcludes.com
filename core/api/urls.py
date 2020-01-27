@@ -22,7 +22,9 @@ from .views import (
     UpdateTickets,
     TicketDetailView,
     EntryListView,
-    EntryCreateView
+    EntryCreateView,
+    VideoListView,
+    VideoDetailView
 )
 
 urlpatterns = [
@@ -54,6 +56,8 @@ urlpatterns = [
          EntryListView.as_view(), name='entries-list'),
     path('entries/create/',
          EntryCreateView.as_view(), name='entries-create'),
-
-
+    path('videos/',
+         VideoListView.as_view(), name='video-list'),
+    path('videos/<slug>/',
+         VideoDetailView.as_view(), name='video-detail'),
 ]

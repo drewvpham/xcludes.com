@@ -61,7 +61,7 @@ class UserProfile(models.Model):
     is_active = models.BooleanField(default=True)
     is_uploader = models.BooleanField(default=False)
     one_click_purchasing = models.BooleanField(default=False)
-    tickets = models.IntegerField(default=0)
+    tickets = models.IntegerField(default=1000)
 
     def __str__(self):
         return self.user.username
@@ -286,9 +286,6 @@ class Video(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=False)
     modified_at = models.DateTimeField(auto_now=True)
     private = models.BooleanField(default=True)
-    tags = models.ManyToManyField(Tag, blank=True, null=True)
-    categories = models.ManyToManyField(Category, blank=True, null=True)
-    pornstars = models.ManyToManyField(Pornstar, blank=True, null=True)
 
     def __str__(self):
         return self.title + ": " + str(self.videofile)
@@ -297,6 +294,51 @@ class Video(models.Model):
         return reverse('videos:detail', kwargs={
             'slug': self.slug
         })
+
+
+class VideoTag(models.Model):
+    video = models.ForeignKey(Video, related_name='video_tags', on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, related_name='tags', on_delete=models.CASCADE)
+    score = models.IntegerField(null=True, default=0)
+    show = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = (
+            ('video', 'tag')
+        )
+
+    def __str__(self):
+        return self.video.title + ": " + str(self.tag.name)
+
+
+class VideoCategory(models.Model):
+    video = models.ForeignKey(Video, related_name='video_categories', on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='category', on_delete=models.CASCADE)
+    score = models.IntegerField(null=True, default=0)
+    show = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = (
+            ('video', 'category')
+        )
+
+    def __str__(self):
+        return self.video + ": " + str(self.category)
+
+
+class VideoPornstar(models.Model):
+    video = models.ForeignKey(Video, related_name='video_pornstars', on_delete=models.CASCADE)
+    pornstar = models.ForeignKey(Pornstar, related_name='pornstars', on_delete=models.CASCADE)
+    score = models.IntegerField(null=True, default=0)
+    show = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = (
+            ('video', 'pornstar')
+        )
+
+    def __str__(self):
+        return self.video + ": " + str(self.pornstar)
 
 
 class Rating(models.Model):

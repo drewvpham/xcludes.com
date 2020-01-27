@@ -12,16 +12,16 @@ import {
   Header,
   Icon,
   Image,
-  Item,
+  data,
   Label,
-  List,
   Loader,
+  List,
   Message,
   Segment,
   Select,
   Divider
 } from "semantic-ui-react";
-import { playDetailURL, contestEntryURL } from "../constants";
+import { playDetailURL, contestEntriesURL, addToCartURL } from "../constants";
 import { fetchCart } from "../store/actions/cart";
 import { fetchProfile } from "../store/actions/profile";
 import { authAxios } from "../utils";
@@ -30,7 +30,9 @@ class PlayDetail extends React.Component {
   state = {
     loading: false,
     error: null,
+    formVisible: false,
     data: [],
+    entries: [],
     formData: {}
   };
 
@@ -38,13 +40,39 @@ class PlayDetail extends React.Component {
     this.handleFetchContest();
   }
 
+  handleToggleForm = () => {
+    const { formVisible } = this.state;
+    this.setState({
+      formVisible: !formVisible
+    });
+  };
+
+  handleFetchContest = () => {
+    const {
+      match: { params }
+    } = this.props;
+    this.setState({ loading: true });
+    axios
+      .get(playDetailURL(params.slug))
+      .then(res => {
+        this.setState({
+          data: res.data,
+          entries: res.data.entries,
+          loading: false
+        });
+      })
+      .catch(err => {
+        this.setState({ error: err, loading: false });
+      });
+  };
   handleContestEntry = (slug, numEntries, ticketCost) => {
     this.setState({ loading: true });
-    // const numEntries = numEntries;
+
     authAxios
-      .post(contestEntryURL, { slug, numEntries, ticketCost })
+      .post(contestEntriesURL, { slug, numEntries, ticketCost })
       .then(res => {
         this.props.refreshProfile();
+        this.handleFetchContest();
         this.setState({ loading: false });
       })
       .catch(err => {
@@ -52,29 +80,14 @@ class PlayDetail extends React.Component {
       });
   };
 
-  handleFetchContest = () => {
-    const {
-      match: { params }
-    } = this.props;
-
-    this.setState({ loading: true });
-    axios
-      .get(playDetailURL(params.slug))
-      .then(res => {
-        this.setState({ data: res.data, loading: false });
-      })
-      .catch(err => {
-        this.setState({ error: err, loading: false });
-      });
-  };
-
   render() {
-    const { data, error, loading } = this.state;
-
+    const { data, entries, error, formData, formVisible, loading } = this.state;
     const one_entry = 1;
     const cost_one = 1;
     const cost_five = 5;
     const six_entries = 6;
+
+    console.log("entries", entries, typeof entries);
 
     return (
       <Container>
@@ -85,14 +98,7 @@ class PlayDetail extends React.Component {
             content={JSON.stringify(error)}
           />
         )}
-        {loading && (
-          <Segment>
-            <Dimmer active inverted>
-              <Loader inverted>Loading</Loader>
-            </Dimmer>
-            <Image src="/images/wireframe/short-paragraph.png" />
-          </Segment>
-        )}
+
         <Grid columns={2} divided>
           <Grid.Row>
             <Grid.Column>
@@ -126,26 +132,40 @@ class PlayDetail extends React.Component {
               </Form>
             </Grid.Column>
             <Grid.Column>
-              <Header as="h2">Entries</Header>
-
+              <Header as="h2">Contest Entries</Header>
+              {loading && (
+                <Segment>
+                  <Dimmer active inverted>
+                    <Loader inverted>Loading</Loader>
+                  </Dimmer>
+                  <Image src="/images/wireframe/short-paragraph.png" />
+                </Segment>
+              )}
               <List>
-                <List.Item>
-                  <Image
-                    avatar
-                    src="https://react.semantic-ui.com/images/avatar/small/rachel.png"
-                  />
+                {entries &&
+                  entries.map(v => {
+                    return (
+                      <React.Fragment key={v.id}>
+                        <List.Item>
+                          <Image
+                            avatar
+                            src="https://react.semantic-ui.com/images/avatar/small/rachel.png"
+                          />
 
-                  <List.Content>
-                    <List.Header as="a">Rachel</List.Header>
-                    <List.Description>
-                      Last seen watching
-                      <a>
-                        <b>Arrested Development</b>
-                      </a>
-                      just now.
-                    </List.Description>
-                  </List.Content>
-                </List.Item>
+                          <List.Content>
+                            <List.Header as="a">{v.user}</List.Header>
+                            <List.Description>
+                              Last seen watching
+                              <a>
+                                <b>Arrested Development</b>
+                              </a>
+                              just now.
+                            </List.Description>
+                          </List.Content>
+                        </List.Item>
+                      </React.Fragment>
+                    );
+                  })}
               </List>
             </Grid.Column>
           </Grid.Row>
@@ -154,14 +174,16 @@ class PlayDetail extends React.Component {
     );
   }
 }
-
 const mapDispatchToProps = dispatch => {
   return {
+    refreshCart: () => dispatch(fetchCart()),
     refreshProfile: () => dispatch(fetchProfile())
   };
 };
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PlayDetail);
+export default withRouter(
+  connect(
+    null,
+    mapDispatchToProps
+  )(PlayDetail)
+);

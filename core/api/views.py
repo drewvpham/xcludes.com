@@ -17,7 +17,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from core.models import Item, OrderItem, Order
 from .serializers import (
     ItemSerializer, OrderSerializer, ItemDetailSerializer, AddressSerializer,
-    PaymentSerializer, VideoSerializer, VideoDetailSerializer, MembershipSerializer, ContestSerializer, ContestDetailSerializer, EntrySerializer, UserProfileSerializer
+    PaymentSerializer, VideoSerializer, MembershipSerializer, ContestSerializer, ContestDetailSerializer, EntrySerializer, UserProfileSerializer
 )
 from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation, Video, Membership, Contest, Entry
 
@@ -36,7 +36,7 @@ class VideoListView(ListAPIView):
 class VideoDetailView(RetrieveAPIView):
     lookup_field = 'slug'
     permission_classes = (AllowAny,)
-    serializer_class = VideoDetailSerializer
+    serializer_class = VideoSerializer
     queryset = Video.objects.all()
 
 
@@ -117,6 +117,7 @@ class AddToCartView(APIView):
         item = get_object_or_404(Item, slug=slug)
 
         minimum_variation_count = Variation.objects.filter(item=item).count()
+        print(minimum_variation_count)
         if len(variations) < minimum_variation_count:
             print('sending error message', "Please specify the required variation types")
             return Response({"message": "Please specify the required variation types"}, status=HTTP_400_BAD_REQUEST)
@@ -126,6 +127,7 @@ class AddToCartView(APIView):
             user=request.user,
             ordered=False
         )
+
         for v in variations:
             order_item_qs = order_item_qs.filter(
                 Q(item_variations__exact=v)
@@ -135,6 +137,7 @@ class AddToCartView(APIView):
             order_item = order_item_qs.first()
             order_item.quantity += 1
             order_item.save()
+
         else:
             order_item = OrderItem.objects.create(
                 item=item,
@@ -145,10 +148,12 @@ class AddToCartView(APIView):
             order_item.save()
 
         order_qs = Order.objects.filter(user=request.user, ordered=False)
+
         if order_qs.exists():
             order = order_qs[0]
             if not order.items.filter(item__id=order_item.id).exists():
                 order.items.add(order_item)
+                print(order_qs, 'right hreere')
                 return Response(status=HTTP_200_OK)
 
         else:
