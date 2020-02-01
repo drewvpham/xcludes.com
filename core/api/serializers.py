@@ -229,14 +229,14 @@ class MembershipSerializer(serializers.ModelSerializer):
 
 class EntrySerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
-    # user_profile = serializers.SerializerMethodField()
+    user_profile = serializers.SerializerMethodField()
 
     class Meta:
         model = Entry
         fields = (
             'id',
             'user',
-            # 'user_profile',
+            'user_profile',
             'code',
             'contest',
             'winner',
@@ -247,8 +247,8 @@ class EntrySerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         return obj.user.username
 
-    # def get_user_profile(self, obj):
-    #     return UserProfileSerializer(obj.user.id).data
+    def get_user_profile(self, obj):
+        return UserProfileSerializer(obj.user.userprofile).data
 
 
 class ContestSerializer(serializers.ModelSerializer):
@@ -290,7 +290,7 @@ class ContestDetailSerializer(serializers.ModelSerializer):
         )
 
     def get_entries(self, obj):
-        return EntrySerializer(obj.entry_set.all(), many=True).data
+        return EntrySerializer(obj.entry_set.all().order_by('-created_date'), many=True).data
 
 
 class VideoSerializer(serializers.ModelSerializer):

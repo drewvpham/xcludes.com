@@ -32,6 +32,7 @@ ADDRESS_CHOICES = (
 class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    username = models.CharField(max_length=50, blank=True, null=True)
     stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
     one_click_purchasing = models.BooleanField(default=False)
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
@@ -241,7 +242,8 @@ class Refund(models.Model):
 
 def userprofile_receiver(sender, instance, created, *args, **kwargs):
     if created:
-        userprofile = UserProfile.objects.create(user=instance)
+        print('instance', instance, instance.username)
+        userprofile = UserProfile.objects.create(user=instance, username=instance.username)
 
 
 post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)

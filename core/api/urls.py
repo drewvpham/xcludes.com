@@ -21,10 +21,11 @@ from .views import (
     ContestDetailView,
     UpdateTickets,
     TicketDetailView,
-    EntryListView,
+    EntriesDetailView,
     EntryCreateView,
     VideoListView,
-    VideoDetailView
+    VideoDetailView,
+    UserDetailView
 )
 
 urlpatterns = [
@@ -53,11 +54,14 @@ urlpatterns = [
     path('play/<slug>/', ContestDetailView.as_view(), name='contest-detail'),
     path('profile-summary/', TicketDetailView.as_view(), name='profile-summary'),
     path('entries/',
-         EntryListView.as_view(), name='entries-list'),
+         EntriesDetailView.as_view(), name='entries-list'),
     path('entries/create/',
          EntryCreateView.as_view(), name='entries-create'),
     path('videos/',
          VideoListView.as_view(), name='video-list'),
     path('videos/<slug>/',
          VideoDetailView.as_view(), name='video-detail'),
+    path('user/<username>/',
+         UserDetailView.as_view(), name='user-detail'),
+    path('infinite-api/', EntriesDetailView.as_view(), name='infinite-react')
 ]

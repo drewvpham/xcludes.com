@@ -35,3 +35,4 @@ export const contestEntriesURL = `${endpoint}/entries/create/`;
 export const videoListURL = `${endpoint}/videos/`;
 export const videoDetailURL = slug => `${endpoint}/videos/${slug}/`;
 export const videoUploadURL = slug => `${endpoint}/videos/upload/`;
+export const userDetailURL = username => `${endpoint}/user/${username}/`;

@@ -365,16 +365,44 @@ class MembershipListView(ListAPIView):
     queryset = Membership.objects.all().order_by('price')
 
 
-class EntryListView(ListAPIView):
+def is_there_more_data(request):
+    offset = request.GET.get('offset')
+    contest_id = int(request.GET.get('contest_id'))
+    if int(offset) > Entry.objects.filter(contest_id=contest_id).count():
+        return False
+    return True
+
+
+class EntriesDetailView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = EntrySerializer
-    queryset = Entry.objects.all()
+    # queryset = Entry.objects.all()
+
+    def get_queryset(self):
+        qs = infinite_filter(self.request)
+        return qs
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response({
+            "entries": serializer.data,
+            "has_more": is_there_more_data(request)})
 
 
 class ContestListView(ListAPIView):
     permission_classes = (AllowAny, )
     serializer_class = ContestSerializer
     queryset = Contest.objects.all()
+
+
+def infinite_filter(request):
+    print(request, '****************************')
+    limit = int(request.GET.get('limit'))
+    offset = int(request.GET.get('offset'))
+    contest_id = int(request.GET.get('contest_id'))
+
+    return Entry.objects.filter(contest_id=contest_id)[offset: offset+limit]
 
 
 class ContestDetailView(RetrieveAPIView):
@@ -385,9 +413,10 @@ class ContestDetailView(RetrieveAPIView):
 
 
 class UserDetailView(RetrieveAPIView):
+    lookup_field = 'username'
     permission_classes = (AllowAny,)
     serializer_class = UserProfileSerializer
-    queryset = Contest.objects.all()
+    queryset = UserProfile.objects.all()
 
 
 class EntryCreateView(APIView):

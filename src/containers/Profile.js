@@ -577,14 +577,6 @@ class Profile extends React.Component {
                 content={JSON.stringify(error)}
               />
             )}
-            {loading && (
-              <Segment>
-                <Dimmer active inverted>
-                  <Loader inverted>Loading</Loader>
-                </Dimmer>
-                <Image src="/images/wireframe/short-paragraph.png" />
-              </Segment>
-            )}
           </Grid.Column>
         </Grid.Row>
         <Grid.Row>

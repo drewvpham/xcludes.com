@@ -51,10 +51,12 @@ class PlayDetail extends React.Component {
     const {
       match: { params }
     } = this.props;
+
     this.setState({ loading: true });
     axios
       .get(playDetailURL(params.slug))
       .then(res => {
+        const newEntries = res.data.entries;
         this.setState({
           data: res.data,
           entries: res.data.entries,
@@ -133,36 +135,40 @@ class PlayDetail extends React.Component {
             </Grid.Column>
             <Grid.Column>
               <Header as="h2">Contest Entries</Header>
-              {loading && (
-                <Segment>
-                  <Dimmer active inverted>
-                    <Loader inverted>Loading</Loader>
-                  </Dimmer>
-                  <Image src="/images/wireframe/short-paragraph.png" />
-                </Segment>
-              )}
+
               <List>
+                {loading && <Loader active inline="centered" />}
                 {entries &&
                   entries.map(v => {
+                    let options = {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    };
+
+                    // const date = Date(v.created_date);
+
                     return (
                       <React.Fragment key={v.id}>
                         <List.Item>
-                          <Image
-                            avatar
-                            src="https://react.semantic-ui.com/images/avatar/small/rachel.png"
-                          />
-
+                          <div>
+                            <Image
+                              avatar
+                              src={`http://127.0.0.1:8000${v.user_profile.image}`}
+                            />
+                            <span as="a">{v.user}</span>
+                          </div>
                           <List.Content>
                             <List.Header as="a">{v.user}</List.Header>
                             <List.Description>
-                              Last seen watching
-                              <a>
-                                <b>Arrested Development</b>
-                              </a>
-                              just now.
+                              Entry date: {v.created_date}
                             </List.Description>
                           </List.Content>
                         </List.Item>
+                        <Divider />
                       </React.Fragment>
                     );
                   })}
