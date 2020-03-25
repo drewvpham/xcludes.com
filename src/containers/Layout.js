@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import { logout } from "../store/actions/auth";
 import { fetchCart } from "../store/actions/cart";
 import { fetchProfile } from "../store/actions/profile";
-
+import logo from "../assets/images/logo.jpg";
 class CustomLayout extends React.Component {
   componentDidMount() {
     this.props.fetchProfile();
@@ -36,6 +36,11 @@ class CustomLayout extends React.Component {
       <div>
         <Menu borderless size="mini">
           <Container>
+            <Menu.Item header className="logo">
+              <Link to="/">
+                <Image src={logo} size="tiny" />
+              </Link>
+            </Menu.Item>
             <Link to="/">
               <Menu.Item header>Videos </Menu.Item>
             </Link>

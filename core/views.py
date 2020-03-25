@@ -513,3 +513,10 @@ class RequestRefundView(View):
             except ObjectDoesNotExist:
                 messages.info(self.request, "This order does not exist.")
                 return redirect("core:request-refund")
+
+
+def infinite_filter(request):
+    limit = request.GET.get('limit')
+    offset = request.GET.get('offset')
+    contest_id = request.GET.get('contest_id')
+    return Entries.objects.all()[int(offset): int(offset)+int(limit)]

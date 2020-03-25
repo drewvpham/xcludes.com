@@ -18,7 +18,7 @@ import PlayList from "./containers/PlayList";
 import PlayDetail from "./containers/PlayDetail";
 import Membership from "./containers/Membership";
 import VideoUpload from "./containers/VideoUpload";
-import InfiniteResults from "./containers/InfiniteResults";
+import InfiniteResults from "./containers/InfiniteScrollResults";
 const BaseRouter = () => (
   <Hoc>
     <Route exact path="/products" component={ProductList} />

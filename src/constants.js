@@ -36,3 +36,6 @@ export const videoListURL = `${endpoint}/videos/`;
 export const videoDetailURL = slug => `${endpoint}/videos/${slug}/`;
 export const videoUploadURL = slug => `${endpoint}/videos/upload/`;
 export const userDetailURL = username => `${endpoint}/user/${username}/`;
+
+export const loginURL = `${localhost}/rest-auth/login/`;
+export const signupURL = `${localhost}/rest-auth/registration/`;

@@ -4,6 +4,7 @@ import {
   Container,
   Menu,
   Dimmer,
+  Divider,
   Card,
   Button,
   Loading,
@@ -20,6 +21,8 @@ import { fetchCart } from "../store/actions/cart";
 import { authAxios } from "../utils";
 import VideoFilter from "./VideoFilter";
 import { videoListURL } from "../constants";
+import { VideoPreview } from "./VideoPreview";
+
 class VideoList extends React.Component {
   state = {
     loading: false,
@@ -163,6 +166,24 @@ class VideoList extends React.Component {
             );
           })}
         </Card.Group>
+
+        <React.Fragment>
+          <h4>Trending</h4>
+          <div className="video-grid">
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+            <VideoPreview />
+          </div>
+        </React.Fragment>
       </Container>
     );
   }

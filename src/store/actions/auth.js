@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as actionTypes from "./actionTypes";
+import { loginURL, signupURL } from "../../constants";
 
 export const authStart = () => {
   return {
@@ -41,9 +42,9 @@ export const authLogin = (username, password) => {
   return dispatch => {
     dispatch(authStart());
     axios
-      .post("http://127.0.0.1:8000/rest-auth/login/", {
-        username: username,
-        password: password
+      .post(loginURL, {
+        username,
+        password
       })
       .then(res => {
         const token = res.data.key;
@@ -54,7 +55,8 @@ export const authLogin = (username, password) => {
         dispatch(checkAuthTimeout(3600));
       })
       .catch(err => {
-        dispatch(authFail(err));
+        console.log(err.response.data.non_field_errors[0]);
+        dispatch(authFail(err.response.data.non_field_errors[0]));
       });
   };
 };
@@ -63,11 +65,11 @@ export const authSignup = (username, email, password1, password2) => {
   return dispatch => {
     dispatch(authStart());
     axios
-      .post("http://127.0.0.1:8000/rest-auth/registration/", {
-        username: username,
-        email: email,
-        password1: password1,
-        password2: password2
+      .post(signupURL, {
+        username,
+        email,
+        password1,
+        password2
       })
       .then(res => {
         const token = res.data.key;

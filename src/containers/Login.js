@@ -15,22 +15,29 @@ import { authLogin } from "../store/actions/auth";
 class LoginForm extends React.Component {
   state = {
     username: "",
-    password: ""
+    password: "",
+    formError: null
   };
 
   handleChange = e => {
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({ [e.target.name]: e.target.value, formError: null });
   };
 
   handleSubmit = e => {
     e.preventDefault();
     const { username, password } = this.state;
-    this.props.login(username, password);
+    if (username !== "" && password !== "") {
+      this.props.login(username, password);
+    } else {
+      this.setState({
+        formError: "Please enter all the form fields"
+      });
+    }
   };
 
   render() {
     const { error, loading, token } = this.props;
-    const { username, password } = this.state;
+    const { username, password, formError } = this.state;
     if (token) {
       return <Redirect to="/" />;
     }
@@ -42,7 +49,16 @@ class LoginForm extends React.Component {
       >
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" color="teal" textAlign="center"></Header>
-          {error && <p>{this.props.error.message}</p>}
+          {formError && (
+            <Message negative>
+              <Message.Header>{formError}</Message.Header>
+            </Message>
+          )}
+          {error && (
+            <Message negative>
+              <Message.Header>{error}</Message.Header>
+            </Message>
+          )}
 
           <React.Fragment>
             <Form size="large" onSubmit={this.handleSubmit}>

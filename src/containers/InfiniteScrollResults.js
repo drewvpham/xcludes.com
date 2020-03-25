@@ -2,6 +2,7 @@ import React from "react";
 import axios from "axios";
 import { playDetailURL } from "../constants";
 import { List } from "semantic-ui-react";
+
 class InfiniteResults extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -18,7 +19,7 @@ class InfiniteResults extends React.PureComponent {
         loadEntries,
         state: { error, loading, hasMore }
       } = this;
-      if (error || loading || hasMore) return;
+      if (error || loading || !hasMore) return;
       if (
         document.documentElement.scrollHeight -
           document.documentElement.scrollTop ===
@@ -61,14 +62,14 @@ class InfiniteResults extends React.PureComponent {
         });
     });
   };
+
   handleClick() {
-    console.log("iwas waclias");
     this.loadEntries();
   }
 
   render() {
     const { error, hasMore, loading, entries } = this.state;
-    console.log(hasMore, "*********");
+
     return (
       <div style={{ overflowY: "scroll", flex: 1 }}>
         <List>
